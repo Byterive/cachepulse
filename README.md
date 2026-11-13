@@ -1,3 +1,5 @@
+![CachePulse: see whether your prompt cache was reused, and why not](assets/readme-banner.png)
+
 # CachePulse
 
 See whether your prompt cache was reused, and why not.
@@ -10,12 +12,25 @@ Claude Code keeps your conversation in a prompt cache so each request does not p
 
 CachePulse puts the answer next to the prompt. It shows how much of the last request was read from the cache, how long the cache may last, and, after a miss, the most likely cause with the evidence behind it.
 
+![How CachePulse works: each request, its cache read and write, the cache age, the likely miss cause, and the evidence label on every figure](assets/workflow.png)
+
 ## Install
 
 ```
 /plugin marketplace add Byterive/kit
 /plugin install cachepulse@byterive-kit
 ```
+
+## Try it
+
+1. Send a few requests, then look at the band above the prompt
+   It shows the cache read share as a bar, the cache state and the TTL with its source, and the last request's read, wrote and new tokens.
+2. `/cachepulse why`
+   After a miss or a partial hit, it gives the likely cause with its evidence.
+3. `/cachepulse config`
+   It prints the full list of TTL sources with the winner marked, plus the subagent TTL.
+
+![Example CachePulse band and panel with sample values: 99.6% cache read, Warm, about 48 minutes left; the latest partial hit caused by a model change; the TTL from the account default](assets/panel.png)
 
 ## What you get
 
@@ -60,10 +75,12 @@ Every figure carries a label: observed (reported by Claude Code), configured (se
 
 ## Privacy
 
-- CachePulse uses token counts and timestamps from Claude Code's events.
-- Request data is kept in memory for the session, 200 requests at most. Your theme and toast choices are saved by Claude Code's plugin store.
+- CachePulse uses token counts and timestamps from Claude Code's events. To show where the TTL comes from, it also reads the settings and variables listed under "Where the TTL comes from", plus the subagent TTL variable `CLAUDE_CODE_SUBAGENT_PROMPT_CACHE_TTL` and the `subagentPromptCacheTtl` setting.
+- For plan usage, the account default and the cost line, it reads the usage Claude Code reports for the session: plan usage windows and, when given, the session cost.
+- Request data is kept in memory for the session, 200 requests at most. Claude Code's plugin store keeps a few small values between sessions: your theme, TTL pick and on or off choices, the last model name, the last reported TTL and the account kind.
 - It makes no network requests, starts no processes and writes no files of its own.
 - It does not change Claude Code's settings, files or variables.
+- The full policy is in [PRIVACY.md](PRIVACY.md).
 
 ## Limits
 
@@ -73,6 +90,6 @@ Every figure carries a label: observed (reported by Claude Code), configured (se
 
 ## Licence
 
-MIT. Copyright (c) 2026 Junaid Iqbal (Byterive). See LICENSE.
+License: MIT. Copyright (c) 2026 Junaid Iqbal (Byterive). See LICENSE.
 
-Independent project by Byterive. Not affiliated with or endorsed by Anthropic. [byterive.com](https://byterive.com)
+*Independent project by Byterive. Not affiliated with or endorsed by Anthropic.* · [byterive.com](https://byterive.com)

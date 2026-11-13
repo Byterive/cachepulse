@@ -37,6 +37,7 @@ export function isAtLeast2_1_300(base: string | undefined): boolean {
 export function lastCacheActive(samples: readonly Sample[]): Sample | null {
   for (let i = samples.length - 1; i >= 0; i--) {
     const s = samples[i]
+    if (s === undefined) continue
     if (s.agentId === undefined && s.state === 'data' && (s.read > 0 || s.written > 0)) {
       return s
     }
