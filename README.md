@@ -79,6 +79,8 @@ Every figure carries a label: observed (reported by Claude Code), configured (se
 - For plan usage, the account default and the cost line, it reads the usage Claude Code reports for the session: plan usage windows and, when given, the session cost.
 - Request data is kept in memory for the session, 200 requests at most. Claude Code's plugin store keeps a few small values between sessions: your theme, TTL pick and on or off choices, the last model name, the last reported TTL and the account kind.
 - It makes no network requests, starts no processes and writes no files of its own.
+- None of the settings or variables it reads is a token, key or password, and none of them leaves your computer.
+- It listens to three Claude Code events that share a name with a call: closing its own pane (`ui.close`, to redraw the band's Open button), a compact (`session.compact`, to mark it on the timeline) and its own `/cachepulse` command. It passes the first two on unchanged and answers only its own command.
 - It does not change Claude Code's settings, files or variables.
 - The full policy is in [PRIVACY.md](PRIVACY.md).
 

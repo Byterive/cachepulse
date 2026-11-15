@@ -15,33 +15,26 @@ export const PANE_NOTE = 'Real: settings and variables. Inferred: timing, accoun
 /** Store key for the TTL Claude Code reported at the last model switch. */
 export const REPORTED_KEY = 'hostTtl'
 
-/** The stored host report, or null when none or malformed. */
-export async function readReported($: EngineInterface): Promise<Reported | null> {
-  const v = (await $.store.get(REPORTED_KEY).catch(() => undefined)) as Partial<Reported> | undefined
+/** The stored host report (register.tsx reads the store), or null when none or malformed. */
+export function asReported(stored: unknown): Reported | null {
+  const v = stored as Partial<Reported> | undefined | null
   if (v === undefined || v === null || (v.ttl !== '5m' && v.ttl !== '1h') || typeof v.at !== 'number') return null
   return { ttl: v.ttl, at: v.at }
 }
 
-/** The subagent TTL line from its own variable and setting; read when shown, so no state shape changes. */
-export async function readSubagentLine($: EngineInterface): Promise<string> {
-  const none = () => undefined
-  return subagentLine({
-    force5m: isOn(await $.env.get('FORCE_PROMPT_CACHING_5M').catch(none)),
-    env: asTtl(await $.env.get('CLAUDE_CODE_SUBAGENT_PROMPT_CACHE_TTL').catch(none)),
-    setting: asTtl(await $.settings.read({ key: 'subagentPromptCacheTtl' }).catch(none)),
-    enable1h: isOn(await $.env.get('ENABLE_PROMPT_CACHING_1H').catch(none)),
-  })
+/** The subagent TTL line from the raw values register.tsx read; read when shown, so no state shape changes. */
+export function asSubagentLine(force5m: string | undefined, env: unknown, setting: unknown, enable1h: string | undefined): string {
+  return subagentLine({ force5m: isOn(force5m), env: asTtl(env), setting: asTtl(setting), enable1h: isOn(enable1h) })
 }
 
 /** `/cachepulse config` text with the host report and the subagent TTL. */
-export async function explainConfig($: EngineInterface, config: Config, samples: readonly Sample[]): Promise<string> {
-  return explainText(config, samples, await readReported($), await readSubagentLine($))
+export function explainConfig(config: Config, samples: readonly Sample[], reported: Reported | null, sub: string): string {
+  return explainText(config, samples, reported, sub)
 }
 
 /** Pane section for the settings explainer: every TTL source, winner marked, the host report, then the notes. */
-export async function explainPane($: EngineInterface, { Box, Text }: Parts, config: Config, samples: readonly Sample[]) {
-  const line = reportedLine(config, samples, await readReported($))
-  const sub = await readSubagentLine($)
+export function explainPane({ Box, Text }: Parts, config: Config, samples: readonly Sample[], reported: Reported | null, sub: string) {
+  const line = reportedLine(config, samples, reported)
   const rows = sourceRows(config, samples)
   const shown = rows.filter(r => r.win || r.value !== null)
   const others = rows.length - shown.length

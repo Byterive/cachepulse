@@ -1,6 +1,6 @@
 {
   "name": "cachepulse",
-  "version": "0.1.55",
+  "version": "0.1.56",
   "description": "Prompt-cache meter and miss explanations for Claude Code: read share, TTL with source label, per-request timeline.",
   "author": {
     "name": "Junaid Iqbal",

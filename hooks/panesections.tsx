@@ -1,4 +1,4 @@
-import type { EngineInterface, RenderInput } from 'claude-code'
+import type { Elements, EngineInterface, RenderInput, RenderSurface } from 'claude-code'
 
 import type { Marker, Sample, Ttl } from '../types'
 import { dividerLine, labelChip, labelledLine, splitLabel } from './chips'
@@ -13,14 +13,18 @@ import { whyLines } from './why'
 
 /** The pane's render event. */
 type Ev = RenderInput<'Pane'>
+type Parts = Pick<ReturnType<EngineInterface['ui']['resolve']>, 'Box' | 'Text'>
+/** The Svg element of a surface that has one; register.tsx passes null on the terminal. */
+export type SvgEl = Elements[Exclude<RenderSurface, 'terminal'>]['Svg']
+/** A plan window as the host reports it in `$.session.usage().rateLimits`. */
+type Window = { kind: string; percentUsed: number; resetsAt?: string }
 
 /**
  * Plan usage section (right after Cost estimate), or null when the host reports
  * no plan windows. Everything but the bars and their colours is the dark grey style.
  */
-export async function planUsage($: EngineInterface, e: Ev) {
-  const { Box, Text } = $.ui.resolve(e)
-  const limits = ((await $.session.usage().catch(() => undefined))?.rateLimits ?? []).filter(isPlanWindow)
+export function planUsage({ Box, Text }: Parts, e: Ev, rateLimits: readonly Window[]) {
+  const limits = rateLimits.filter(isPlanWindow)
   if (limits.length === 0) return null
   const usageRow = (w: { kind: string; percentUsed: number; resetsAt?: string }) => {
     const pct = Math.min(100, Math.max(0, Math.round(w.percentUsed)))
@@ -54,14 +58,14 @@ export async function planUsage($: EngineInterface, e: Ev) {
  * Everything in the pane below the TTL and plan-usage blocks (moved out of register.tsx):
  * totals, latest miss, trend and timeline, each after a dotted divider.
  */
-export async function paneSections(
-  $: EngineInterface,
+export function paneSections(
+  { Box, Text }: Parts,
+  Svg: SvgEl | null,
   e: Ev,
   list: readonly Sample[],
   marks: readonly Marker[],
   ttl: Ttl | null,
 ) {
-  const { Box, Text } = $.ui.resolve(e)
   const room = Math.max(1, (e.viewport?.rows ?? 24) - 8)
   const rows = mergeItems(list, marks).slice(0, room)
   // Narrow panes drop Model and Who below 76 cells, and Share below 40.
@@ -75,8 +79,7 @@ export async function paneSections(
   // Trend: Svg on Desktop and VS Code, block characters in the terminal.
   const svg = trendSvg(list)
   let graph = null
-  if (svg !== null && e.surface !== 'terminal') {
-    const { Svg } = $.ui.resolve(e)
+  if (svg !== null && Svg !== null) {
     graph = <Svg source={svg} alt="Read share and context size over the last requests" />
   } else if (svg !== null) {
     const tt = textTrend(list)
