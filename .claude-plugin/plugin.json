@@ -1,12 +1,13 @@
 {
   "name": "cachepulse",
-  "version": "0.1.54",
+  "version": "0.1.55",
   "description": "Prompt-cache meter and miss explanations for Claude Code: read share, TTL with source label, per-request timeline.",
   "author": {
     "name": "Junaid Iqbal",
     "url": "https://byterive.com"
   },
   "homepage": "https://byterive.com",
+  "privacyPolicyUrl": "https://github.com/Byterive/cachepulse/blob/main/PRIVACY.md",
   "repository": "https://github.com/Byterive/cachepulse",
   "license": "MIT",
   "keywords": [
